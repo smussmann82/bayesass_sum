@@ -24,9 +24,17 @@ if( $opts{h} ){
 # parse the command line
 my( $dir, $out ) = &parsecom( \%opts );
 
-my $file = "spd_182+DES+BBC.out";
+opendir( WD, $dir ) or die "Can't open $dir: $!\n\n";
 
+my @contents = readdir( WD );
 
+foreach my $file( @contents ){
+	if( $file =~ /\.out$/ ){
+		&getdata( $file, $dir );
+	}
+}
+
+closedir WD;
 
 exit;
 
@@ -87,6 +95,32 @@ sub filetoarray{
 
 	# close input file
 	close FILE;
+
+}
+
+#####################################################################################################
+# subroutine to grab important data from inputs
+
+sub getdata{
+
+	my( $file, $dir ) = @_;
+
+	my @arr;
+	my @matrix;
+	my @pops;
+	&filetoarray("$dir/$file", \@arr);
+	foreach my $line( @arr ){
+		if( $line =~ /^\s{1}m\[/ ){
+			push( @matrix, $line );
+		}
+		if( $line =~ /0\-\>/ ){
+			push( @pops, $line );
+		}
+	}
+
+	foreach my $line( @matrix ){
+		print $line, "\n";
+	}
 
 }
 
