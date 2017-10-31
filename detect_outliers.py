@@ -18,12 +18,13 @@ with open(data) as f:
 	next(reader, None) #skip headers
 	into_pop, from_pop, n, mean, stdev, km = zip(*reader)
 
-outlier_frac = 0.02
+outlier_frac = 0.025
 ell = EllipticEnvelope(contamination=outlier_frac)
 km = np.array(km)
 km = km.astype(np.float)
 mean = np.array(mean)
 mean = mean.astype(np.float)
+mean = -1*(np.log(mean))
 
 X1 = np.vstack((km, mean)).T
 
@@ -49,8 +50,8 @@ threshold = stats.scoreatpercentile(ell.decision_function(X1), 100*outlier_frac)
 print threshold
 
 # First make a meshgrid for the (x1, x2) feature space
-x1s = np.linspace(np.min(X1[:, 0])-5, np.max(X1[:, 0])+5, 15)
-x2s = np.linspace(np.min(X1[:, 1])-0.1, np.max(X1[:, 1])+0.1, 15)
+x1s = np.linspace(np.min(X1[:, 0])-100, np.max(X1[:, 0])+100, 15)
+x2s = np.linspace(np.min(X1[:, 1])-1, np.max(X1[:, 1])+1, 15)
 x1grid, x2grid = np.meshgrid(x1s, x2s) 
 
 # Now make predictions for each point on the grid 
