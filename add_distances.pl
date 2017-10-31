@@ -35,7 +35,7 @@ my @filecontents; #file containing summarized bayesass data
 
 &disthash(\@distancelines, \%distances);
 
-
+&printdata(\@filecontents, \%distances, $out);
 
 #print Dumper(\%distances);
 
@@ -117,6 +117,32 @@ sub disthash{
 		$$hashref{$temp[0]}{$temp[1]} = $temp[2];
 		$$hashref{$temp[1]}{$temp[0]} = $temp[2];
 	}
+}
+
+#####################################################################################################
+# subroutine to print out data file
+
+sub printdata{
+	my ($arrayref, $hashref, $out) = @_;
+
+	my $counter = 0;
+
+	open(OUT, '>', $out) or die "Can't open $out: $!\n\n";
+
+	foreach my $line( @$arrayref ){
+		if( $counter == 0 ){
+			print OUT $line, "\t", "km";
+		}else{
+			print OUT $line, "\t";
+			my @temp = split(/\t+/, $line);
+			print OUT $$hashref{$temp[0]}{$temp[1]};
+		}
+		print OUT "\n";
+		$counter++;
+	}
+
+	close OUT;
+
 }
 
 #####################################################################################################
