@@ -133,11 +133,11 @@ sub printdata{
 		if( $counter == 0 ){
 			print OUT $line, "\t", "km";
 		}else{
-			print OUT $line, "\t";
 			my @temp = split(/\s+/, $line);
 			if( $temp[0] eq $temp[1] ){
-				print OUT 0.0;
+				next;
 			}else{
+				print OUT $line, "\t";
 				print OUT $$hashref{$temp[0]}{$temp[1]};
 			}
 		}

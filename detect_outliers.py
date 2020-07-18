@@ -8,10 +8,14 @@ import pandas as pd
 import numpy as np
 import pickle
 import csv
+import sys
 
+from comline import ComLine
 from sklearn.covariance import EllipticEnvelope
 
-data = "condensed.txt"
+input = ComLine(sys.argv[1:])
+
+data = input.args.infile
 
 with open(data) as f:
 	reader=csv.reader(f, delimiter='\t')
@@ -40,9 +44,18 @@ print total
 
 #print predicted outliers to file
 f = open("outliers.txt", 'w')
+fpop = open("outlier_pop_list.txt", 'w')
+fpop.write("into from\n")
+counter=0
 for x in pred:
 	f.write(str(x))
 	f.write("\n")
+	if x == -1:
+		fpop.write(into_pop[counter])
+		fpop.write(" ")
+		fpop.write(from_pop[counter])
+		fpop.write("\n")
+	counter=counter+1
 f.close()
 
 # Get the "thresholding" value from the decision function
