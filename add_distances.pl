@@ -109,7 +109,7 @@ sub disthash{
 	my( $arrayref, $hashref ) = @_;
 
 	foreach my $pair( @$arrayref ){
-		my @temp = split( /\s+/, $pair );
+		my @temp = split( /,/, $pair );
 		if( $temp[2] < 0 ){
 			$temp[2] = 0.0;
 		}
@@ -134,8 +134,12 @@ sub printdata{
 			print OUT $line, "\t", "km";
 		}else{
 			print OUT $line, "\t";
-			my @temp = split(/\t+/, $line);
-			print OUT $$hashref{$temp[0]}{$temp[1]};
+			my @temp = split(/\s+/, $line);
+			if( $temp[0] eq $temp[1] ){
+				print OUT 0.0;
+			}else{
+				print OUT $$hashref{$temp[0]}{$temp[1]};
+			}
 		}
 		print OUT "\n";
 		$counter++;

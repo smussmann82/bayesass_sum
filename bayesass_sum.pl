@@ -13,7 +13,7 @@ if( scalar( @ARGV ) == 0 ){
 
 # take command line arguments
 my %opts;
-getopts( 'd:hm:o:', \%opts );
+getopts( 'd:ho:', \%opts );
 
 # if -h flag is used, or if no command line arguments were specified, kill program and print help
 if( $opts{h} ){
@@ -22,7 +22,7 @@ if( $opts{h} ){
 }
 
 # parse the command line
-my( $dir, $out, $mcmc ) = &parsecom( \%opts );
+my( $dir, $out ) = &parsecom( \%opts );
 
 # declare variables
 my %hohoa; #hash of hashes of arrays to hold migration estimates
@@ -45,7 +45,7 @@ foreach my $file( @contents ){
 }
 
 #summarize the data from the bayesass output files
-&summarize( \%hohoa, \%sumhohoa, $mcmc );
+&summarize( \%hohoa, \%sumhohoa );
 
 #print the data to an output file
 &printdata( \%sumhohoa, $out );
@@ -89,9 +89,9 @@ sub parsecom{
 	# set default values for command line arguments
 	my $dir = $opts{d} || die "No input directory specified.\n\n"; #used to specify input directory
 	my $out = $opts{o} || die "No output file specified.\n\n"  ; #used to specify output file name.
-	my $mcmc = $opts{m} || die "Number of retained MCMC samples not specified.\n\n"; #used to specify number of mcmc samples that were retained.
+	#my $mcmc = $opts{m} || die "Number of retained MCMC samples not specified.\n\n"; #used to specify number of mcmc samples that were retained.
 
-	return( $dir, $out, $mcmc );
+	return( $dir, $out );
 
 }
 
@@ -199,7 +199,7 @@ sub migmatrix{
 # subroutine to summarize migration matrix data
 sub summarize{
 
-	my( $hohoaref, $sumhohoaref, $mcmc ) = @_;
+	my( $hohoaref, $sumhohoaref ) = @_;
 
 	foreach my $pop1( sort keys %$hohoaref ){
 		#print $pop1, "\n";
@@ -210,7 +210,7 @@ sub summarize{
 				#print $val, "\n";
 				push( @arr, $val );
 			}
-			my( $n, $mean, $stdev ) = &sumstats( \@arr, $mcmc ); #calculate summary statistics
+			my( $n, $mean, $stdev ) = &sumstats( \@arr ); #calculate summary statistics
 
 			$$sumhohoaref{$pop1}{$pop2}{'n'} = $n;
 			$$sumhohoaref{$pop1}{$pop2}{'mean'} = $mean;
@@ -225,7 +225,7 @@ sub summarize{
 # subroutine to calculate summary stats
 sub sumstats{
 
-	my( $arrayref, $mcmc ) = @_;
+	my( $arrayref ) = @_;
 	
 	my $n = 0; #number of sample means included in summary statistic
 	my $mean = 0;
@@ -249,8 +249,8 @@ sub sumstats{
 				push( @stdevs, $2 );
 			}
 		}
-		$mean = &calcmean(\@means, $mcmc, $n);
-		$stdev = &calcmean(\@stdevs, $mcmc, $n);
+		$mean = &calcmean(\@means, $n);
+		$stdev = &calcmean(\@stdevs, $n);
 	}
 
 	return( $n, $mean, $stdev );
@@ -260,7 +260,7 @@ sub sumstats{
 # subroutine to calculate mean from values in an array
 sub calcmean{
 
-	my( $arrayref, $mcmc, $n ) = @_;
+	my( $arrayref, $n ) = @_;
 
 	my $tot = 0;
 
@@ -271,6 +271,31 @@ sub calcmean{
 	my $mean = ($tot/$n);
 
 	return( $mean );
+
+}
+
+#####################################################################################################
+sub calcstdev{
+
+	my( $data, $avg ) = @_;
+
+	if( not @$data ){
+		die( "Empty array\n" );
+	}
+
+	my $total = 0;
+	foreach my $item( @$data ){
+		my $temp = $item - $avg;
+		$temp = $temp**2;
+		$total+=$temp;
+	}
+
+	my $length = scalar( @$data );
+	my $variance = $total / $length;
+
+	my $sd = sqrt($variance);
+
+	return $sd;
 
 }
 
